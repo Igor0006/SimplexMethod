@@ -37,7 +37,7 @@ def find_pivot(col_pivot_index, A, b, precision):
 
 def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
 
-    b[row_pivot_index] = Decimal(str(b[row_pivot_index] / pivot)).quantize(Decimal(precision), ROUND_HALF_UP)
+    b[row_pivot_index + 1] = Decimal(str(b[row_pivot_index + 1] / pivot)).quantize(Decimal(precision), ROUND_HALF_UP)
     for i in range(len(A[row_pivot_index])):
         A[row_pivot_index][i] = Decimal(str(A[row_pivot_index][i] / pivot)).quantize(Decimal(precision), ROUND_HALF_UP)
         
@@ -45,13 +45,14 @@ def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
         if i == row_pivot_index:
             continue
         coefficient = A[i][col_pivot_index]
-        b[i + 1] = b[i + 1] - coefficient * b[row_pivot_index]
+        b[i + 1] = b[i + 1] - coefficient * b[row_pivot_index + 1]
         for j in range(len(A[i])):
             A[i][j] = (Decimal(str(A[i][j] - A[row_pivot_index][j] * coefficient))
                        .quantize(Decimal(precision), ROUND_HALF_UP))
 
     coefficient = C[col_pivot_index]
-    b[0] = b[row_pivot_index] * coefficient
+    b[0] = (Decimal(str(b[0] - b[row_pivot_index + 1] * coefficient))
+            .quantize(Decimal(precision), ROUND_HALF_UP))
     for i in range(len(C)):
         C[i] = (Decimal(str(C[i] - A[row_pivot_index][i] * coefficient))
                 .quantize(Decimal(precision), ROUND_HALF_UP))
