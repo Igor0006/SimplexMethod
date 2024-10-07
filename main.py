@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 def input_data():
     C = list(map(int, input("Enter the vector of coefficients"
@@ -22,11 +22,44 @@ def input_data():
 
     return C, A, b, precision
 
-def find_ratio_vector(pivot_index, constraint, precision):
-    # print(number.quantize(Decimal("1.00"), ROUND_HALF_UP))
-    return list()
+def find_pivot(pivot_index, A, b, precision):
+    ratio = list()
+    for i in range(len(A)):
+        ratio[i] = (b[i] / A[i][pivot_index]).quantize(Decimal(precision), ROUND_HALF_UP)
+    m = max(ratio)
+    for i in ratio:
+        if (i > 0) and (i < m):
+            m = i
+    ratio_pivot = ratio.index(m)
+    pivot_element = A[ratio_pivot][pivot_index]
+    return pivot_element, ratio_pivot
+
+def transform(C, A, b, ratio_pivot, pivot, precision):
+    b[ratio_pivot] = (b[ratio_pivot] / pivot).quantize(Decimal(precision), ROUND_HALF_UP)
+    for i in range(len(b)):
+        if i == ratio_pivot:
+            continue
+        b[i] = b[i] - b[ratio_pivot]
+    for i in range(len(A[ratio_pivot])):
+        A[ratio_pivot][i] = (A[ratio_pivot][i] / pivot).quantize(Decimal(precision), ROUND_HALF_UP)
+    for i in range(len(A)):
+        if i == ratio_pivot:
+            continue
+        for j in range(len(A[i])):
+            A[i][j] = A[i][j] - A[ratio_pivot][j]
+    for i in range(len(C)):
+        C[i] = C[i] - A[ratio_pivot][i]
+    return C, A, b
+
 
 def solve():
     C, A, b, precision = input_data()
     pivot_index = C.index(min(C))
-    ratio = find_ratio_vector(pivot_index, A, precision)
+    while pivot_index < 0:
+        pivot, ratio_pivot = find_pivot(pivot_index, A, b, precision)
+        C, A, b = transform(C, A, b, ratio_pivot, pivot, precision)
+        pivot_index = C.index(min(C))
+    print("Vector of coefficients of objective function:")
+    print(C)
+    print("Maximum value of objective function:")
+    print(b[0])
