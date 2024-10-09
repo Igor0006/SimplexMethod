@@ -1,9 +1,16 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 def input_data():
+    problem = input("Please enter 'max' if you solve maximization problem"
+                    "and 'min' if you solve minimization problem: ")
+
     C = list(map(int, input("Enter the vector of coefficients "
                             "of objective function\n").split()))
     # Vector of coefficients of objective function
+
+    if problem == 'min':
+        for i in range(len(C)):
+            C[i] = -C[i]
 
     A = list()
     # Matrix of coefficients of constraint functions
@@ -21,13 +28,15 @@ def input_data():
     # Approximation accuracy
     precision = "1." + "0" * accuracy
 
-    return C, A, b, precision
+    return C, A, b, problem, precision
 
 def find_pivot(col_pivot_index, A, b, precision):
     ratio = [0] * len(A)
     for i in range(len(A)):
         ratio[i] = Decimal(str(b[i + 1] / A[i][col_pivot_index])).quantize(Decimal(precision), ROUND_HALF_UP)
     m = max(ratio)
+    if m <= 0:
+        return -1, -1
     for i in ratio:
         if (i > 0) and (i < m):
             m = i
@@ -60,15 +69,27 @@ def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
 
 
 def solve():
-    C, A, b, precision = input_data()
+    C, A, b, problem, precision = input_data()
     while min(C) < 0:
         col_pivot_index = C.index(min(C))
         pivot, row_pivot_index = find_pivot(col_pivot_index, A, b, precision)
+        if pivot == -1:
+            print("The method is not applicable!")
+            return
         C, A, b = transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision)
-    print("Vector of coefficients of objective function: ")
-    print(C)
-    print("\n")
-    print("Maximum value of objective function: ")
-    print(b[0])
+    if problem == "max":
+        print("Vector of coefficients of objective function: ")
+        print(C)
+        print("\n")
+        print("Maximum value of objective function: ")
+        print(b[0])
+    elif problem == "min":
+        print("Vector of coefficients of objective function: ")
+        for i in range(len(C)):
+            C[i] = -C[i]
+        print(C)
+        print("\n")
+        print("Minimum value of objective function: ")
+        print(-b[0])
 
 solve()
