@@ -10,7 +10,7 @@ def input_data():
     variables_num = len(C)
     # Vector of coefficients of objective function
 
-    if problem == 'min':
+    if problem == 'max':
         for i in range(len(C)):
             C[i] = -C[i]
 
