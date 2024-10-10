@@ -110,14 +110,14 @@ def solve():
             for j in range(len(A)):
                 if A[j][i] == 1:
                     one_counter += 1
-                    index = i
+                    index = j
                 elif A[j][i] == 0:
                     zero_counter += 1
                 else:
                     break
             if (one_counter == 1) and (zero_counter == len(A) - 1):
                 decision_variables[i] = b[index + 1]
-        print([-float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
+        print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
         print("\n")
         print("Minimum value of objective function: ")
         print(-b[0])
