@@ -1,8 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP
 
+
 def input_data():
     problem = input("Please enter 'max' if you solve maximization problem"
-                    "and 'min' if you solve minimization problem: ")
+                    "and 'min' if you solve minimization problem: \n")
 
     C = list(map(int, input("Enter the vector of coefficients "
                             "of objective function\n").split()))
@@ -30,10 +31,14 @@ def input_data():
 
     return C, A, b, problem, precision
 
+
 def find_pivot(col_pivot_index, A, b, precision):
     ratio = [0] * len(A)
     for i in range(len(A)):
-        ratio[i] = Decimal(str(b[i + 1] / A[i][col_pivot_index])).quantize(Decimal(precision), ROUND_HALF_UP)
+        if A[i][col_pivot_index] == 0:
+            ratio[i] = -1
+            continue
+        ratio[i] = Decimal(str(b[i + 1] / A[i][col_pivot_index]))
     m = max(ratio)
     if m <= 0:
         return -1, -1
@@ -44,29 +49,26 @@ def find_pivot(col_pivot_index, A, b, precision):
     pivot_element = A[row_pivot_index][col_pivot_index]
     return pivot_element, row_pivot_index
 
-def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
 
-    b[row_pivot_index + 1] = Decimal(str(b[row_pivot_index + 1] / pivot)).quantize(Decimal(precision), ROUND_HALF_UP)
+def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
+    b[row_pivot_index + 1] = Decimal(str(b[row_pivot_index + 1] / pivot))
     for i in range(len(A[row_pivot_index])):
-        A[row_pivot_index][i] = Decimal(str(A[row_pivot_index][i] / pivot)).quantize(Decimal(precision), ROUND_HALF_UP)
-        
+        A[row_pivot_index][i] = Decimal(str(A[row_pivot_index][i] / pivot))
+
     for i in range(len(A)):
         if i == row_pivot_index:
             continue
         coefficient = A[i][col_pivot_index]
         b[i + 1] = b[i + 1] - coefficient * b[row_pivot_index + 1]
         for j in range(len(A[i])):
-            A[i][j] = (Decimal(str(A[i][j] - A[row_pivot_index][j] * coefficient))
-                       .quantize(Decimal(precision), ROUND_HALF_UP))
+            A[i][j] = (Decimal(str(A[i][j] - A[row_pivot_index][j] * coefficient)))
 
     coefficient = C[col_pivot_index]
     b[0] = (Decimal(str(b[0] - b[row_pivot_index + 1] * coefficient))
             .quantize(Decimal(precision), ROUND_HALF_UP))
     for i in range(len(C)):
-        C[i] = (Decimal(str(C[i] - A[row_pivot_index][i] * coefficient))
-                .quantize(Decimal(precision), ROUND_HALF_UP))
+        C[i] = (Decimal(str(C[i] - A[row_pivot_index][i] * coefficient)))
     return C, A, b
-
 
 def solve():
     C, A, b, problem, precision = input_data()
@@ -78,16 +80,44 @@ def solve():
             return
         C, A, b = transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision)
     if problem == "max":
-        print("Vector of coefficients of objective function: ")
-        print(C)
+        print("Vector of decision variables: ")
+        decision_variables = [0] * len(C)
+        for i in range(len(A[0])):
+            one_counter = 0
+            zero_counter = 0
+            index = 0
+            for j in range(len(A)):
+                if A[j][i] == 1:
+                    one_counter += 1
+                    index = j
+                elif A[j][i] == 0:
+                    zero_counter += 1
+                else:
+                    break
+            if (one_counter == 1) and (zero_counter == len(A) - 1):
+                decision_variables[i] = b[index + 1]
+        print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
         print("\n")
         print("Maximum value of objective function: ")
         print(b[0])
     elif problem == "min":
-        print("Vector of coefficients of objective function: ")
-        for i in range(len(C)):
-            C[i] = -C[i]
-        print(C)
+        print("Vector of decision variables: ")
+        decision_variables = [0] * len(C)
+        for i in range(len(A[0])):
+            one_counter = 0
+            zero_counter = 0
+            index = 0
+            for j in range(len(A)):
+                if A[j][i] == 1:
+                    one_counter += 1
+                    index = i
+                elif A[j][i] == 0:
+                    zero_counter += 1
+                else:
+                    break
+            if (one_counter == 1) and (zero_counter == len(A) - 1):
+                decision_variables[i] = b[index + 1]
+        print([-float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
         print("\n")
         print("Minimum value of objective function: ")
         print(-b[0])
