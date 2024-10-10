@@ -3,10 +3,11 @@ from decimal import Decimal, ROUND_HALF_UP
 
 def input_data():
     problem = input("Please enter 'max' if you solve maximization problem"
-                    "and 'min' if you solve minimization problem: \n")
+                    " and 'min' if you solve minimization problem: \n")
 
     C = list(map(int, input("Enter the vector of coefficients "
                             "of objective function\n").split()))
+    variables_num = len(C)
     # Vector of coefficients of objective function
 
     if problem == 'min':
@@ -20,10 +21,10 @@ def input_data():
     for i in range(n):
         C.append(0)
         A.append(list(map(int, input("Enter the coefficients of "
-                                     "constraint function\n").split())))
+                                     "constraint function (without slack variables)\n").split())))
         for j in range(n):
             A[i].append(0)
-        A[i][i + n] = 1
+        A[i][len(C) - 1] = 1
 
     b = [0]
     b += list(map(int, input("Enter the vector of right-hand side numbers\n").split()))
@@ -33,7 +34,7 @@ def input_data():
     # Approximation accuracy
     precision = "1." + "0" * accuracy
 
-    return C, A, b, problem, precision
+    return C, A, b, problem, variables_num, precision
 
 
 def find_pivot(col_pivot_index, A, b, precision):
@@ -75,7 +76,7 @@ def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
     return C, A, b
 
 
-def find_decision_variables(C, A, b):
+def find_decision_variables(C, A, b, variables_num):
     decision_variables = [0] * len(C)
     for i in range(len(A[0])):
         one_counter = 0
@@ -91,11 +92,11 @@ def find_decision_variables(C, A, b):
                 break
         if (one_counter == 1) and (zero_counter == len(A) - 1):
             decision_variables[i] = b[index + 1]
-    return decision_variables
+    return decision_variables[:variables_num]
 
 
 def solve():
-    C, A, b, problem, precision = input_data()
+    C, A, b, problem, variables_num, precision = input_data()
     while min(C) < 0:
         col_pivot_index = C.index(min(C))
         pivot, row_pivot_index = find_pivot(col_pivot_index, A, b, precision)
@@ -105,13 +106,13 @@ def solve():
         C, A, b = transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision)
     if problem == "max":
         print("Vector of decision variables: ")
-        decision_variables = find_decision_variables(C, A, b)
+        decision_variables = find_decision_variables(C, A, b, variables_num)
         print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
         print("Maximum value of objective function: ")
         print(b[0])
     elif problem == "min":
         print("Vector of decision variables: ")
-        decision_variables = find_decision_variables(C, A, b)
+        decision_variables = find_decision_variables(C, A, b, variables_num)
         print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
         print("Minimum value of objective function: ")
         print(-b[0])
