@@ -18,8 +18,12 @@ def input_data():
 
     n = int(input("Enter the number of constraint functions\n"))
     for i in range(n):
+        C.append(0)
         A.append(list(map(int, input("Enter the coefficients of "
                                      "constraint function\n").split())))
+        for j in range(n):
+            A[i].append(0)
+        A[i][i + n] = 1
 
     b = [0]
     b += list(map(int, input("Enter the vector of right-hand side numbers\n").split()))
@@ -70,6 +74,26 @@ def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
         C[i] = (Decimal(str(C[i] - A[row_pivot_index][i] * coefficient)))
     return C, A, b
 
+
+def find_decision_variables(C, A, b):
+    decision_variables = [0] * len(C)
+    for i in range(len(A[0])):
+        one_counter = 0
+        zero_counter = 0
+        index = 0
+        for j in range(len(A)):
+            if A[j][i] == 1:
+                one_counter += 1
+                index = j
+            elif A[j][i] == 0:
+                zero_counter += 1
+            else:
+                break
+        if (one_counter == 1) and (zero_counter == len(A) - 1):
+            decision_variables[i] = b[index + 1]
+    return decision_variables
+
+
 def solve():
     C, A, b, problem, precision = input_data()
     while min(C) < 0:
@@ -81,45 +105,16 @@ def solve():
         C, A, b = transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision)
     if problem == "max":
         print("Vector of decision variables: ")
-        decision_variables = [0] * len(C)
-        for i in range(len(A[0])):
-            one_counter = 0
-            zero_counter = 0
-            index = 0
-            for j in range(len(A)):
-                if A[j][i] == 1:
-                    one_counter += 1
-                    index = j
-                elif A[j][i] == 0:
-                    zero_counter += 1
-                else:
-                    break
-            if (one_counter == 1) and (zero_counter == len(A) - 1):
-                decision_variables[i] = b[index + 1]
+        decision_variables = find_decision_variables(C, A, b)
         print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
-        print("\n")
         print("Maximum value of objective function: ")
         print(b[0])
     elif problem == "min":
         print("Vector of decision variables: ")
-        decision_variables = [0] * len(C)
-        for i in range(len(A[0])):
-            one_counter = 0
-            zero_counter = 0
-            index = 0
-            for j in range(len(A)):
-                if A[j][i] == 1:
-                    one_counter += 1
-                    index = j
-                elif A[j][i] == 0:
-                    zero_counter += 1
-                else:
-                    break
-            if (one_counter == 1) and (zero_counter == len(A) - 1):
-                decision_variables[i] = b[index + 1]
+        decision_variables = find_decision_variables(C, A, b)
         print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
-        print("\n")
         print("Minimum value of objective function: ")
         print(-b[0])
+
 
 solve()
