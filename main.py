@@ -66,8 +66,7 @@ def transform(C, A, b, row_pivot_index, col_pivot_index, pivot, precision):
         C[i] = (Decimal(str(C[i] - A[row_pivot_index][i] * coefficient))
                 .quantize(Decimal(precision), ROUND_HALF_UP))
     return C, A, b
-
-
+    
 def solve():
     C, A, b, problem, precision = input_data()
     while min(C) < 0:
