@@ -118,13 +118,13 @@ def solve():
         decision_variables = find_decision_variables(C, A, b, variables_num)
         print([float(Decimal(x).quantize(Decimal(precision))) for x in decision_variables])
         print("Maximum value of objective function: ")
-        print(b[0])
+        print(float(Decimal(b[0]).quantize(Decimal(precision), ROUND_HALF_UP)))
     elif problem == "min":
         print("Vector of decision variables: ")
         decision_variables = find_decision_variables(C, A, b, variables_num)
         print([float(Decimal(x).quantize(Decimal(precision), ROUND_HALF_UP)) for x in decision_variables])
         print("Minimum value of objective function: ")
-        print(-b[0])
+        print(float(Decimal(-b[0]).quantize(Decimal(precision), ROUND_HALF_UP)))
 
 
 solve()
